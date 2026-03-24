@@ -1,0 +1,123 @@
+clear
+clc
+
+% -----------------------------
+% SIMULATED ELECTRICAL INPUT
+% -----------------------------
+
+time = 0:1:3600;      % seconds (1 hour monitoring period)
+
+voltage = 230;        % UK mains voltage (V)
+
+% simulate current fluctuations around 5A
+current = 5 + 0.5*sin(0.01*time);
+
+% -----------------------------
+% POWER CALCULATION
+% -----------------------------
+
+power = voltage .* current;   % Watts
+
+% -----------------------------
+% ENERGY CALCULATION
+% -----------------------------
+
+time_hours = time / 3600;
+
+% cumulative energy consumption (kWh)
+energy_kwh = cumtrapz(time_hours, power) / 1000;
+
+% -----------------------------
+% ELECTRICITY PRICE
+% -----------------------------
+
+price_kwh = 0.2467;   % £ per kWh (Ofgem price cap approx)
+
+% -----------------------------
+% COST CALCULATION
+% -----------------------------
+
+cost = energy_kwh * price_kwh;
+
+% -----------------------------
+% PLOTS
+% -----------------------------
+
+figure
+plot(time_hours, power,'LineWidth',2)
+xlabel('Time (hours)')
+ylabel('Power (W)')
+title('Simulated Appliance Power Consumption')
+grid on
+
+figure
+plot(time_hours, energy_kwh,'LineWidth',2)
+xlabel('Time (hours)')
+ylabel('Energy Consumption (kWh)')
+title('Cumulative Energy Consumption')
+grid on
+
+figure
+plot(time_hours, cost,'LineWidth',2)
+xlabel('Time (hours)')
+ylabel('Electricity Cost (£)')
+title('Real-Time Electricity Cost Estimation')
+grid on
+% -----------------------------
+% MONTHLY COST ESTIMATION
+% -----------------------------
+
+% average power from simulation
+avg_power = mean(power); % Watts
+
+% assume appliance used 1 hour per day
+daily_energy_kwh = (avg_power / 1000) * 1;
+
+% monthly energy
+monthly_energy_kwh = daily_energy_kwh * 30;
+
+% monthly cost
+monthly_cost = monthly_energy_kwh * price_kwh;
+
+% display result
+fprintf('Estimated Monthly Cost: £%.2f\n', monthly_cost);
+
+% Bar chart for visualization
+figure
+bar(monthly_cost)
+ylabel('Cost (£)')
+title('Estimated Monthly Appliance Electricity Cost')
+grid on
+% -----------------------------
+% ENERGY SAVINGS WITH MONITORING
+% -----------------------------
+
+% Average power from simulation
+avg_power = mean(power); % Watts
+
+% Convert to kWh for 1 hour usage
+energy_normal = (avg_power / 1000);
+
+% Assume monitoring reduces energy use by 5%
+reduction_factor = 0.05;
+
+energy_with_monitoring = energy_normal * (1 - reduction_factor);
+
+% Monthly energy consumption
+monthly_energy_normal = energy_normal * 30;
+monthly_energy_monitoring = energy_with_monitoring * 30;
+
+% Electricity price (Ofgem average)
+price_kwh = 0.2467;
+
+% Monthly costs
+cost_normal = monthly_energy_normal * price_kwh;
+cost_monitoring = monthly_energy_monitoring * price_kwh;
+
+% Plot comparison
+figure
+bar([cost_normal cost_monitoring])
+set(gca,'XTickLabel',{'Without Monitoring','With IoT Monitoring'})
+ylabel('Monthly Electricity Cost (£)')
+title('Estimated Cost Savings Using IoT Energy Monitoring')
+grid on
